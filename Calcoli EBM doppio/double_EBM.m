@@ -1,4 +1,4 @@
-function [Um_bot, Um_top, C_bot, alpha] = double_EBM(h, rc, params)
+function [Um_bot, Um_top, C_bot, alpha, eps1_cone_v, eps1_bulge_v, eps1_top_v, eps1_single_v] = double_EBM(h, rc, params)
 % Compute quantities in the form of "maps", i.e. matrices for values of Um_bot,
 % Um_top, C_bot computed for the given domain. Returns a column (fixed rc,
 % scroll h)
@@ -17,13 +17,17 @@ E = params.Y;   % Elastic module
 t0 = params.t0; % polymer thickness
 epsilon_p = params.epsP;
 epsilon_o = params.epsO;
-to_left = params.to_res;
+to_left = params.to_res; % residual oil thickness
+deltaR = ro - ri;
 
 Um_bot = zeros(size(h)); Um_top = zeros(size(h)); C_bot = zeros(size(h));
+eps1_cone_v = zeros(size(h)); eps1_bulge_v = zeros(size(h)); eps1_top_v = zeros(size(h));
+eps1_single_v = zeros(size(h)); Um_top_single = zeros(size(h));
 
 % fixed rc, scroll columns (h)
 alpha = alpha_sol(h, rc, params); % compute alpha (vector) for all h values, fixed rc (pick alpha(i) in the for)
 b = sqrt((ro-ri)^2 + ((h+h0)/2).^2); % compute b (vector) for all h values, fixed rc (pick b(i) in the for)
+l = b + 8/3*alpha.^2./b - 32/15*alpha.^4./(b).^3; % compute l
 r1 = linspace(ri,rc,20)';   r2 = linspace(rc,ro,20)';  r3 = linspace(ri,ro,40)';% for integration
 
 % 1/2 LEAP
@@ -31,9 +35,9 @@ r1 = linspace(ri,rc,20)';   r2 = linspace(rc,ro,20)';  r3 = linspace(ri,ro,40)';
 h_bot = (h0 - h)/2; % 1/2 HALF height of the bottom actuator 
 h_top = (h0 + h)/2; % 1/2 HALF height of the top actuator
 uc_bot = -(h_bot).^2/(2*(rc-ri)^2)/(1/(rc-ri)-(rc^2+ro^2)/(rc^2-ro^2)/rc);
-%fake_rc_ro = 0.9999999999*ro;
-fake_rc_ro = 1.0000000001*ro;
+fake_rc_ro = (1 - 1e-6)*ro;
 uc_top = -(h_top).^2/(2*(fake_rc_ro-ri)^2)/(1/(fake_rc_ro-ri)-(fake_rc_ro^2+ro^2)/(fake_rc_ro^2-ro^2)/fake_rc_ro);
+%uc_top = -(h_top).^2/(2*(ro-ri)^2)/(1/(ro-ri)-(ro^2+ro^2)/(fake_rc_ro^2-ro^2)/ro);
 
 for i = 1:numel(h) % scroll columns
     % BOTTOM ACTUATOR: compute Umbot and Cbot
@@ -46,7 +50,7 @@ for i = 1:numel(h) % scroll columns
     eps2_2 = 0;                                             % circumferential
     eps3_2 = 0;                                             % normal
     % compute Umbot
-    Um_bot(i) = pi*t0*E/(1-nu^2) * (trapz(r1, r1.*(eps1_1.^2 + eps2_1.^2 + 2*nu*eps1_1.*eps2_1)) + trapz(r2, r2.*(eps1_2.^2 + eps2_2.^2 + 2*nu*eps1_2.*eps2_2)) );
+    Um_bot(i) = pi*t0*E/(1-nu^2) * (trapz(r1, r1.*(eps1_1.^2)) + trapz(r2, r2.*(eps1_2.^2)));
     % compute Cbot
     Cp = 2*pi*epsilon_p/t0 * trapz( r2, (1+eps1_2).*(1+eps2_2)./(1+eps3_2).*r2 ); % polymer capacitance
     if to_left > 0
@@ -57,11 +61,25 @@ for i = 1:numel(h) % scroll columns
     end
 
     % TOP ACTUATOR: compute Umtop
-    eps1_bulge = 8/3*(alpha(i)/b(i))^2 + 32/15*(alpha(i)/b(i))^4; % strain expression for the bulge
+    eps1_bulge = 8/3*(alpha(i)/b(i))^2 - 32/15*(alpha(i)/b(i))^4; % strain expression for the bulge
+    %eps1_bulge = 0;
     eps1_cone = uc_top(i)/(fake_rc_ro-ri) + (h_top(i).^2)/(2*(fake_rc_ro-ri)^2);
+    %eps1_cone = uc_top(i)/(ro-ri) + (h_top(i).^2)/(2*(ro-ri)^2);
     eps1_top = eps1_bulge + eps1_cone;
     % compute Umtop
-    Um_top(i) = pi*t0*E/(1-nu^2)*(trapz(r3, (eps1_top).^2.*r3));
+    %Um_top(i) = pi*t0*E/(1-nu^2)*(trapz(r3, (eps1_top).^2.*r3));
+
+
+
+    % TOP ACTUATOR: compute Umtop with the single epsilon (cleaner)
+    eps1_single = l(i)/(deltaR) - 1;
+    Um_top(i) = pi*t0*E/(1-nu^2)*(trapz(r3, (eps1_single).^2.*r3)); 
+
+    % to workspace
+    eps1_bulge_v(i) = eps1_bulge;
+    eps1_cone_v(i)  = eps1_cone;
+    eps1_top_v(i) = eps1_top;
+    eps1_single_v(i) = eps1_single;
 
 end
 

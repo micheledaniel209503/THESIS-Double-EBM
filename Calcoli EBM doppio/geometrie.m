@@ -26,7 +26,7 @@ for i=1:length(area)
     % versioni espanse e semplificate
     area_semp(i) = 2/3*b*a(i) + 8/15*a(i)^3/b;
     volume_semp(i) = area_semp(i)*2*pi*rr;
-    arco_semp(i) = b + 8*a(i)^2 / (3*b) + 32*a(i)^4 / (15*b^3);
+    arco_semp(i) = b + 8*a(i)^2 / (3*b) - 32*a(i)^4 / (15*b^3);
  end
 
 area_max = (pi*(b/2)^2)/2;
