@@ -15,14 +15,15 @@ r1r = params.r1r; % [m]
 r2r = params.r2r; % [m]
 hr = params.hr; % [m]
 R0 = params.R0; % [m]
+R1 = params.R1; % [m]
 nu = params.nu; % Poisson coefficient
 E = params.Y;   % Elastic module
 t0 = params.t0; % [m] polymer thickness
 t0_res = params.t0_res; % [m] reservoir (VHB) thickness at the unstretched state (before manufacturing reservoir)
-epsilon_p = params.epsP;
-epsilon_o = params.epsO;
-to_left = params.to_res; % residual oil thickness
-mu = params.mu;
+epsilon_p = params.epsP; % [F/m] permittivity of polymer
+epsilon_o = params.epsO; % [F/m] permittivity of oil
+to_left = params.to_res; % [m] residual oil thickness
+mu = params.mu; % [Pa] Neo-Hook parameter for VHB 
 
 Um_ebm = zeros(size(h)); Um_res = zeros(size(h)); C_ebm = zeros(size(h));
 lambda1_res_v = zeros(size(h)); lambda2_res_v = zeros(size(h));
@@ -58,10 +59,13 @@ for i = 1:numel(h) % scroll columns
     end
 
     % RESERVOIR
-    lambda1_res = l(i)/R0; % [-] meridian stretch
-    lambda2_res = 1.6; % [-] circumferencial stretch = 80/50
+    lambda_p = R1/R0; % preload factor
+    dR0 = (r2r - r1r)/lambda_p; % anulus radius at rest
+    A0_res = pi*((r2r/lambda_p)^2 - (r1r/lambda_p)^2); % area at rest
+    lambda1_res = l(i)/dR0; % [-] meridian stretch
+    lambda2_res = lambda_p; % [-] circumferencial stretch = 80/50
     Psi_res = mu/2*(lambda1_res^2 + lambda2_res^2 + (lambda1_res*lambda2_res)^-2 - 3); % [J/m^3] energy density 
-    Um_res(i) = pi*R0^2*t0_res*Psi_res;
+    Um_res(i)   = A0_res*t0_res*Psi_res; % [J] energy
 
     % to workspace
     lambda1_res_v(i) = lambda1_res;
