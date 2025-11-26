@@ -91,6 +91,13 @@ for i = 1:lr-1
     dCbot_dhi(i, :) = interp1(rc_vec, dCbot_dh(i, :), rci, 'linear');
 end
 
+%% F(h) @ V = 0, rc = ro fixed (no zipping at V=0)
+eps_ro = 1e-9;
+[Um_bot, Um_top, ~, ~, ~, ~, ~, ~] = double_EBM(h_vec, ro-eps_ro, params);
+Utot0 = 2*(Um_bot + Um_top); % double cone
+F0    = gradient(Utot0, h_vec);   % dU/dz with z=2h
+F0 = F0(2:end);
+
 
 %% Solve system for F(h)
 % eq_h_map(h,rc) = dU/dh = dUmbot_dhi + dUmtop_dhi  (size: [lh-1, lr-1]),
@@ -156,6 +163,8 @@ for ivf = 1:numel(V_list)
         'DisplayName', sprintf('V = %.1f kV', V0*1e-3));
     
 end
+
+plot(hi*1e3, -F0)
 
 legend('Location','best');
 

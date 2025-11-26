@@ -1,0 +1,35 @@
+clc;
+close all;
+%Laser = logsout{3}.Values.Data;
+Time = logsOut{5}.Values.Time;
+Potent = logsOut{4}.Values.Data ;
+Loadcell = logsOut{2}.Values.Data;
+%off_laser = mean(Laser(Time<2.5));
+
+off_Loadcell = mean(Loadcell(Time<5));
+Loadcell_gain = 1.52;
+
+off_Potent = mean(Potent(Time<5));
+%Potent_gain = 27.425;
+
+Potent = -(Potent-off_Potent);
+Loadcell = (Loadcell - off_Loadcell) * Loadcell_gain;
+
+figure(2);
+hold on;
+
+disp_name = {'---', '0 KV' , '00 KV' , '3 KV', '-3 KV' , '5 KV' , '-5 KV', ...
+'7 KV', '-7 KV', 'T5 KV' , 'T-5 KV', 'T3 KV', 'T-3 KV' , 'f0 KV'};
+style = {'','r','b', '', 'k','' , 'c', '','r--','b--','k--','m', 'c--', 'g'};
+for i=[2 3 4 5 6 7 8 ]
+Pot{i} = Potent((Time<(i-1)*T+T/4)&(Time>(i-1)*T));
+Loadcell_n{i} = Loadcell((Time<(i-1)*T+T/4)&(Time>(i-1)*T));
+Pot{i} = smooth(Pot{i},100);
+Loadcell_n{i} = smooth(Loadcell_n{i},3000);
+plot(Pot{i}, Loadcell_n{i},style{i}, 'DisplayName',disp_name{i},'LineWidth',1.5);
+hold on
+end
+xlabel('Displacement (mm)','FontSize',12,'FontWeight','bold')
+ylabel('Force (N)','FontSize',12,'FontWeight','bold')
+title('Force vs. Displacement','FontSize',14,'FontWeight','bold')
+legend show

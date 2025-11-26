@@ -1,0 +1,26 @@
+clear all; close all
+T_sample = 1e-4;
+start_time = 15;
+slope = 1;%1/20;% And Freq.
+max_pos = 10; %mm
+T = 4;
+stop_time = 5;
+strt_pos=140;%20;%55
+T_per = 1/slope;
+Potent_gain = 27.425;
+
+v_slope = 0.502; % In sec
+v_0 = 6; %In Kv
+Kp = 15; %20;
+Load_pos = 2;%mm
+Ki = 1; %1
+N_start = 1;
+N_finish = 39;
+cyclenum = 3;
+Duration_time = (N_finish+1)*T;%second
+omega_filt = 2*pi*100;
+
+num_periods = 5;
+bias = 135;
+%run_time = start_time+T_per*num_periods+stop_time;
+run_time = 20; %start_time+(3/slope*max_pos)*num_periods+stop_time;

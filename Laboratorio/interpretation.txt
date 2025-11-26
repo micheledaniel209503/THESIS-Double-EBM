@@ -1,0 +1,5 @@
+when laser sees MINIMA (DOWN) displacement:
+EBM is relaxed --> V=0, F=low
+
+when laser sees MAXIMA (UP) displacement:
+EBM is contracted --> V!=0, F=high

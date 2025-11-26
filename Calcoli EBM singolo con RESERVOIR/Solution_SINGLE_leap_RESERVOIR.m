@@ -10,14 +10,16 @@ epsP = 3.9*8.854e-12;    % [F/m] polymer
 epsO = 2.7*8.854e-12;    % [F/m] oil
 ri = 8e-3;               % [m]
 ro = 15e-3;              % [m]
-r1r = ri;
-r2r = ro + 2e-3;
-hr = 7.5e-3;             % [m] height of the VHB reservoir (internal cylindrical support)
+r1r = 7.5e-3;
+r2r = ro + 1e-3;
+%hr = 9e-3;             % [m] height of the VHB reservoir (internal cylindrical support)
+hr = 5e-3;
 t0 = 25.4e-6;            % [m] keplan thickness
 t0_res = 0.5e-3;         % [m] thickness of unstretched VHB disc (reservoir)
 to_res = 5e-6/2;         % [m] residual oil film (half)
 %mu = 5e5;
 mu = 1.83e5;             % [Pa] Neo-Hook's parameter for VHB reservoir @ approx 20°C
+%mu = 0.00001;
 R0 = 50e-3/2;            % [m] initial radius of the unstretched VHB disc
 R1 = 80e-3/2;            % [m] final radius of the stretched VHB disc (flat)
 
@@ -108,7 +110,7 @@ F0    = interp1(rc_vec, (dUebm_dh + dUres_dh).', ro, 'linear', 'extrap').';  % c
 
 
 %% SOLUTION of the equations
-V_min = 2e3; V_max = 8e3;
+V_min = 0; V_max = 8e3;
 V_list = linspace(V_min, V_max, 4);  lv = numel(V_list);
 
 % initialize solution vectors
@@ -132,7 +134,7 @@ for iv = 1:lv
         if ~isempty(k) % if we found a root, refine the interval in between the two points k and k+1 through interpolation
             a = xr(k); b = xr(k+1);
             % find a root on the interpolating function
-            rc_sol = fzero(@(x) interp1(xr, Vrow, x, 'linear','extrap') - Vt, [a,b]); % V(h,rc*) - Vtarget = 0 --> rc*
+            rc_sol = fzero(@(x) interp1(xr, Vrow, x, 'linear') - Vt, [a,b]); % V(h,rc*) - Vtarget = 0 --> rc*
         else
             % fallback: closest point (very unlucky case in which there's
             % no root --> root is on the minimum of the residuals
@@ -142,7 +144,7 @@ for iv = 1:lv
         % for this value of h, we have the solution rc* --> compute F
         rc_v(j,iv) = min(max(rc_sol, rci(1)), rci(end)); % clamp (in case rc_sol is out of the grid)
         alpha_v(j,iv) = alpha_sol(h_vec(j),rc_v(j,iv), params);
-        F_v(j,iv)  = interp1(rci, Fi(j,:), rc_v(j,iv), 'linear','extrap');
+        F_v(j,iv)  = interp1(rci, Fi(j,:), rc_v(j,iv), 'linear');
     end
 end
 
