@@ -1,4 +1,6 @@
-clear; close all; clc
+clear; 
+%close all; 
+clc
 
 %% PARAMETERS
 Y = 1.25e9;              % [Pa]
@@ -123,7 +125,7 @@ V_list = linspace(V_min, V_max, 5);  lv = numel(V_list);
 
 clr = lines(numel(V_list));
 
-figure(1);
+figure;
 subplot(2,1,1); hold on; grid on; grid minor;
 xlabel('h [mm]'); ylabel('F(h) [N]'); title('F(h) (F>0 upwards) at different V levels');
 

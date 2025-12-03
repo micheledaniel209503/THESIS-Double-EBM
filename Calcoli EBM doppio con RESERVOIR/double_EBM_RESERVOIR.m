@@ -51,6 +51,9 @@ for i = 1:numel(h) % scroll columns
     Um_ebm_B(i) = pi*t0*E/(1-nu^2) * (trapz(r3, r3.*(eps1_ebm_B.^2)));
 
     % compute Cbot
+    % CHECK
+    % THISSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+    % THIS WAS TAKEN FROM SINGLE_EBM_RESERVOIR2
     C_bot(i) = ((epsilon_p*epsilon_o*pi*(ro^2-rc^2)) / (2*epsilon_o*t0 + epsilon_p*to_left));
 
     % TOP ACTUATOR: compute Um_top

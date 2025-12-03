@@ -20,6 +20,7 @@ t0_res = 0.5e-3;         % [m] thickness of unstretched VHB disc (reservoir)
 to_res = 5e-6/2;         % [m] residual oil film (half)
 %mu = 5e5;
 mu = 1.83e5;             % [Pa] Neo-Hook's parameter for VHB reservoir @ approx 20°C
+mu = 3.72e4;
 %mu = 1e4;
 R0 = 50e-3/2;            % [m] initial radius of the unstretched VHB disc
 R1 = 80e-3/2;            % [m] final radius of the stretched VHB disc (flat)
@@ -600,10 +601,10 @@ grid on;
 %% FIND ALL COMBINATIONS OF (hr, r2r) that guarantee NO ADDED STIFFNESS OF THE RESERVOIR
 
 % grids
-r2r_lb = ro;
-r2r_ub = ro+20e-3;
+r2r_lb = ro - 10e-3;
+r2r_ub = ro + 15e-3;
 hr_lb = 5e-3;
-hr_ub = 30e-3;
+hr_ub = 20e-3;
 
 hr_vec   = linspace(hr_lb, hr_ub, 20);
 r2r_vec  = linspace(r2r_lb, r2r_ub, 20);
